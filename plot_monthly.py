@@ -13,10 +13,10 @@ from calc_cloud_metrics import find_cs_from_lw
 cs_thres = 0.2
 ov_thres = 0.8
 n_days_thres = 10
-ind_frac_max_melt = .2
+ind_frac_max_melt = .8
 
 data_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/'
-plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/{}_{}_{}_{}/'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt)
+plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/revision/{}_{}_{}_{}/'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt)
 infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/collated_monthly_{}_{}_{}.pkl'.format(cs_thres, ov_thres,
                                                                                                                                 n_days_thres)
 
@@ -47,6 +47,17 @@ site_labels = {
     'guanaco': 'guan',
     'brewster': 'brew'
 }
+
+# take subset of colors from plt.get_cmap('tab20b',20).colors that are distinct with  color blindness. tested using https://www.color-blindness.com/coblis-color-blindness-simulator/
+colors = [
+    [0.12156863, 0.46666667, 0.70588235, 1.],
+    [0.09019608, 0.74509804, 0.81176471, 1.],
+    [0.58039216, 0.40392157, 0.74117647, 1.],
+    [0.7372549, 0.74117647, 0.13333333, 1.],
+    [0.17254902, 0.62745098, 0.17254902, 1.],
+    [0.54901961, 0.3372549, 0.29411765, 1.],
+    [1., 0.73333333, 0.47058824, 1.],
+]
 
 fig, axs = plt.subplots(4, 4, sharey=True, sharex=True, figsize=(9, 9))
 for i, site in enumerate(sites_to_plot):
@@ -81,7 +92,11 @@ for i, site in enumerate(sites_to_plot):
     plt.title(site_labels[site].upper())
 
 plt.tight_layout()
-plt.savefig(plot_dir + 'all monthly hourly cloud fraction with melt.png', dpi=300, format='png', bbox_inches='tight')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'FigA4.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA4.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'all monthly hourly cloud fraction with melt.png', dpi=300, format='png', bbox_inches='tight')
 plt.close()
 
 fig, axs = plt.subplots(4, 4, sharey=True, sharex=True, figsize=(9, 9))
@@ -114,7 +129,14 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         plt.ylabel('Fraction of days')
     plt.title(site_labels[site].upper())
-plt.savefig(plot_dir + 'all monthly daily cloud fraction with melting months.png', dpi=300, format='png', bbox_inches='tight')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig5.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig5.png', dpi=600, format='png', bbox_inches='tight')
+elif '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.8':
+    plt.savefig(plot_dir + 'FigA6.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA6.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'all monthly daily cloud fraction with melting months.png', dpi=300, format='png', bbox_inches='tight')
 plt.close()
 
 fig, axs = plt.subplots(4, 4, sharey=True, sharex=True, figsize=(9, 9))
@@ -138,7 +160,11 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         plt.ylabel(r'$\varepsilon_{eff}$')
     plt.title(site_labels[site].upper())
-plt.savefig(plot_dir + 'all eeff.png', dpi=300, format='png', bbox_inches='tight')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'FigA3.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA3.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'all eeff.png', dpi=300, format='png', bbox_inches='tight')
 plt.close()
 
 min_c = 1  # minimum number of points in bin to plot in contour
@@ -164,7 +190,11 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         plt.ylabel(r'$\varepsilon_{eff}$')
     plt.title(site_labels[site].upper())
-plt.savefig(plot_dir + 'all eeff contour {}.png'.format(min_c), dpi=300, format='png', bbox_inches='tight')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig4.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig4.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'all eeff contour {}.png'.format(min_c), dpi=300, format='png', bbox_inches='tight')
 plt.close()
 
 fig, axs = plt.subplots(4, 4, sharey=True, sharex=True, figsize=(9, 9))
@@ -173,17 +203,17 @@ for i, site in enumerate(sites_to_plot):
     fig.sca(axs.ravel()[i])
     ax = axs.ravel()[i]
     ax_rh = plt.twinx(ax)
-    colors = plt.cm.tab10
+    # colors = plt.cm.tab10
     full_dict = collated_dict[site]
     for j, var in enumerate(['tc', 'ts', 'ea', 'rh', 'ws','alb']):
         month_df = full_dict['month_df']
         if var in ['rh', 'alb']:
             if var == 'alb':
-                ax_rh.plot(month_df[var].values *100, '-x', color=colors(j / 10), label=var)
+                ax_rh.plot(month_df[var].values *100, '-x', color=colors[j], label=var)
             else:
-                ax_rh.plot(month_df[var].values, '-x', color=colors(j / 10), label=var)
+                ax_rh.plot(month_df[var].values, '-x', color=colors[j], label=var)
         else:
-            ax.plot(month_df[var].values, '-*', color=colors(j / 10), label=var)
+            ax.plot(month_df[var].values, '-*', color=colors[j], label=var)
     ax.set_xticks(np.arange(12))
     ax_rh.set_xticks(np.arange(12))
     ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
@@ -204,7 +234,11 @@ for i, site in enumerate(sites_to_plot):
         ax_rh.legend([r'$RH$', 'alb'],loc='lower left', facecolor='none')#frameon=False,
     plt.title(site_labels[site].upper())
 plt.tight_layout()
-plt.savefig(plot_dir + 'all monthly met.png', dpi=300, format='png')  # bbox_extra_artists=(lg,),,  bbox_inches='tight'
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'FigA1.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA1.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'all monthly met cb.png', dpi=300, format='png')  # bbox_extra_artists=(lg,),,  bbox_inches='tight'
 plt.close()
 
 fig, axs = plt.subplots(4, 4, sharey=True, sharex=True, figsize=(9, 9))
@@ -212,14 +246,14 @@ for i, site in enumerate(sites_to_plot):
     # fig, ax = plt.subplots()
     fig.sca(axs.ravel()[i])
     ax = axs.ravel()[i]
-    colors = plt.cm.tab10
+    # colors = plt.cm.tab10
     full_dict = collated_dict[site]
     month_df = full_dict['month_df']
-    for j, var in enumerate(['swnet', 'lwnet', 'rnet', 'qs', 'ql', 'qc', 'qm']):  # 'qr', 'qps',
+    for j, var in enumerate(['swnet', 'lwnet', 'rnet', 'qs', 'ql', 'qm', 'qc']):  # 'qr', 'qps',
         if var in month_df.keys():
-            ax.plot(month_df[var].values, '-*', color=colors(j / 10), label=var)
-        elif i == 3:# make hidden point to plot missing variables in lengend
-            ax.plot(-1,0,'-*', color=colors(j / 10),label=var)
+            ax.plot(month_df[var].values, '-*', color=colors[j], label=var)
+        elif i == 4:# make hidden point to plot missing variables in lengend
+            ax.plot(-1,0,'-*', color=colors[j],label=var)
     # plt.ylim(0, 1.2)
     plt.xlim(-0.5,11.5)
     ax.set_xticks(np.arange(12))
@@ -230,11 +264,15 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         ax.set_ylabel(r'Flux ($W m^{-2}$)')
     if i == 4:
-        l = ax.legend(['$SWnet$', '$LWnet$', '$Rnet$', '$Q_S$', '$Q_L$', '$Q_C$', '$Q_M$'],loc='center left', facecolor='none',frameon=False)
+        l = ax.legend(['$SWnet$', '$LWnet$', '$Rnet$', '$Q_S$', '$Q_L$',  '$Q_M$','$Q_C$',],loc='center left', facecolor='none',frameon=False)
 
     plt.title(site_labels[site].upper())
 plt.tight_layout()
-plt.savefig(plot_dir + 'all monthly fluxes.png', dpi=300, format='png')  # bbox_extra_artists=(lg,),,  bbox_inches='tight'
-plt.close()
 
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'FigA2.png', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA2.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'all monthly fluxes cb.png', dpi=300, format='png')  # bbox_extra_artists=(lg,),,  bbox_inches='tight'
+plt.close()
 

@@ -10,39 +10,7 @@ import os
 import pandas as pd
 from adjustText import adjust_text
 from scipy.stats import linregress
-
-
-# take 16 colors that are most distinct from polychrome 36, excluding light grey #e4e1e3 . from Figure 6 of https://www.biorxiv.org/content/10.1101/303883v1.full.pdf
-
-# reordered into latitude groups
-# plt.get_cmap('tab20',20).colors
-polychrome36 = [
-    [0.12156863, 0.46666667, 0.70588235, 1.],
-    [0.68235294, 0.78039216, 0.90980392, 1.],
-    [0.09019608, 0.74509804, 0.81176471, 1.],
-    [0.61960784, 0.85490196, 0.89803922, 1.],
-
-    [0.59607843, 0.8745098, 0.54117647, 1.],
-    [0.7372549, 0.74117647, 0.13333333, 1.],
-    [0.85882353, 0.85882353, 0.55294118, 1.],
-    [0.17254902, 0.62745098, 0.17254902, 1.],
-
-    [0.58039216, 0.40392157, 0.74117647, 1.],
-    [0.77254902, 0.69019608, 0.83529412, 1.],
-    [0.89019608, 0.46666667, 0.76078431, 1.],
-    [0.96862745, 0.71372549, 0.82352941, 1.],
-
-    # [1., 0.49803922, 0.05490196, 1.],
-    [1., 0.73333333, 0.47058824, 1.],
-    [0.54901961, 0.3372549, 0.29411765, 1.],
-    [0.76862745, 0.61176471, 0.58039216, 1.],
-    # [0.49803922, 0.49803922, 0.49803922, 1.],
-    # [0.78039216, 0.78039216, 0.78039216, 1.],
-
-    [0.83921569, 0.15294118, 0.15686275, 1.],
-    # [1., 0.59607843, 0.58823529, 1.],
-]
-
+from cycler import cycler
 
 # set breakpoints in nep to use for 'clear-sky' and 'overcast' conditions - doesn't really matter here - only use monthly average values
 cs_thres = 0.20
@@ -51,7 +19,7 @@ n_days_thres = 10
 ind_frac_max_melt = .2  # fraction of maximum monthly average melt rate to use to select months for analysis
 
 data_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/'
-plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/{}/'.format(ind_frac_max_melt)
+plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/revision/{}/'.format(ind_frac_max_melt)
 infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/collated_monthly_{}_{}_{}.pkl'.format(cs_thres, ov_thres,
                                                                                                                                 n_days_thres)
 if not os.path.exists(plot_dir):
@@ -219,6 +187,20 @@ site_labels = {
     'brewster': 'brew'
 }
 
+# take subset of colors from plt.get_cmap('tab20b',20).colors that are distinct with color blindness. tested using https://www.color-blindness.com/coblis-color-blindness-simulator/
+colors = [
+    [0.09019608, 0.74509804, 0.81176471, 1.],
+    [0.7372549, 0.74117647, 0.13333333, 1.],
+    [0.17254902, 0.62745098, 0.17254902, 1.],
+    [0.54901961, 0.3372549, 0.29411765, 1.],
+]
+
+# define cycle of markers and line colors
+cc = (cycler(color=colors) * cycler(markerstyle=['P', 'X', '*', 'd']))  # ['D','o','^','s'])) ['P','X', '*', 'd']
+cstyle = []
+for d in cc:
+    cstyle.append(d)
+
 # plot altitude and latitude of sites
 fig, ax = plt.subplots(figsize=[6, 4])
 text = []
@@ -227,35 +209,25 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         alt = full_dict['aws_loc'].altitude
         lat = full_dict['aws_loc'].latitude
-        ax.scatter(alt, lat, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        ax.scatter(alt, lat, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         h = ax.annotate(site_labels[site].upper(),  # text to display
                         (alt, lat),  # this is the point to label
                         textcoords="offset points",  # how to position the text
                         xytext=(2, 2),  # distance from text to points (x,y)
                         ha='right', fontsize=10)  # fontweight='bold', color='b')
         if lat < 0:
-            ax.scatter(alt, -1 * lat, 100, edgecolors=polychrome36[ii], facecolors='none')
+            ax.scatter(alt, -1 * lat, 100, marker=cstyle[ii]['markerstyle'], edgecolors=cstyle[ii]['color'], facecolors='none')
         text.append(h)
 plt.xlabel('Altitude (metres a.s.l)')
 plt.ylabel('Latitude (°N)')
 plt.axhline(0, color='k', linestyle=':')
 fig.tight_layout()
 adjust_text(text)
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        alt = full_dict['aws_loc'].altitude
-        lat = full_dict['aws_loc'].latitude
-        if lat < 0:
-            ax.scatter(alt, -1 * lat, 100, edgecolors=polychrome36[ii], facecolors='none')
-plt.savefig(plot_dir + 'altitude and locations.png'.format(ind_frac_max_melt), dpi=300, format='png')
-
+plt.savefig(plot_dir + 'Fig2.png'.format(ind_frac_max_melt), dpi=300, format='png')
 
 plt.rcParams.update({'font.size': 8})
 
-
 # plot average cloud effects by site attributes
-# fig, axs = plt.subplots(2, 5, figsize=[10, 4])
 fig, axs = plt.subplots(4, 5, figsize=[10, 8])
 axs = axs.ravel()
 ax = axs[0]
@@ -269,15 +241,14 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = alt = full_dict['aws_loc'].altitude
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(a) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
 
 ax = axs[1]
 plt.sca(ax)
-# plt.title('(b)')
 x = []
 y = []
 plt.xlabel('Absolute latitude (°)')
@@ -285,15 +256,14 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.abs(full_dict['aws_loc'].latitude)
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(b) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
 
 ax = axs[2]
 plt.sca(ax)
-# plt.title('(c)')
 plt.xlabel('$T_a$ (°C)')
 x = []
 y = []
@@ -301,15 +271,14 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['tc']['mean'])  # ta averaged equally across cloudiness bins
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(c) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
 
 ax = axs[3]
 plt.sca(ax)
-plt.title('(d)')
 plt.xlabel('RH (%)')
 x = []
 y = []
@@ -317,8 +286,8 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['rh']['mean'])  # rh averaged equally across cloudiness bins
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(d) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -326,15 +295,14 @@ plt.title('(d) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[4]
 plt.sca(ax)
 plt.xlabel(r'$N_\epsilon$')
-plt.title('(e)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = full_dict['cloud_melt_boxplot_data'][1]  # average cloudiness in selected months
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(e) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -343,15 +311,14 @@ ax = axs[5]
 plt.sca(ax)
 plt.ylabel(r'$Q_M$ CE ($W m^{-2}$)')
 plt.xlabel(r'$WS$ ($m s^{-1}$)')
-# plt.title('(j)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['ws']['mean'])
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(f) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -359,15 +326,14 @@ plt.title('(f) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[6]
 plt.sca(ax)
 plt.xlabel(r'$Q_S$ ($W m^{-2}$)')
-# plt.title('(j)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['qs']['mean'])
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(g) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -375,15 +341,14 @@ plt.title('(g) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[7]
 plt.sca(ax)
 plt.xlabel(r'$Q_L$ ($W m^{-2}$)')
-# plt.title('(j)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['ql']['mean'])
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(h) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -391,15 +356,14 @@ plt.title('(h) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[8]
 plt.sca(ax)
 plt.xlabel(r'$SWin$ ($W m^{-2}$)')
-# plt.title('(j)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['swin']['mean'])
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(i) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -407,15 +371,14 @@ plt.title('(i) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[9]
 plt.sca(ax)
 plt.xlabel(r'$LWin$ ($W m^{-2}$)')
-# plt.title('(j)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['lwin']['mean'])
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(j) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -424,15 +387,14 @@ ax = axs[10]
 plt.sca(ax)
 plt.ylabel(r'$Q_M$ CE ($W m^{-2}$)')
 plt.xlabel(r'$SWin$ CE ($W m^{-2}$)')
-# plt.title('(f)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['swin']['mean']) - full_dict['cloud_diff']['swin']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(k) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -440,15 +402,14 @@ plt.title('(k) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[11]
 plt.sca(ax)
 plt.xlabel(r'$LWin$ CE ($W m^{-2}$)')
-# plt.title('(g)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['lwin']['mean']) - full_dict['cloud_diff']['lwin']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(l) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -456,7 +417,6 @@ plt.title('(l) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[12]
 plt.sca(ax)
 plt.xlabel(r'$SWin$ + $LWin$ CE ($W m^{-2}$)')
-# plt.title('(g)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
@@ -464,8 +424,8 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['swin']['mean']) - full_dict['cloud_diff']['swin']['mean'][0.1] + np.nanmean(
             full_dict['cloud_diff']['lwin']['mean']) - full_dict['cloud_diff']['lwin']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(m) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -473,15 +433,14 @@ plt.title('(m) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[13]
 plt.sca(ax)
 plt.xlabel(r'Albedo')
-# plt.title('(h)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['alb']['mean'])  # albedo averaged equally across cloudiness bins
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(n) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -489,15 +448,14 @@ plt.title('(n) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[
 ax = axs[14]
 plt.sca(ax)
 plt.xlabel(r'$Rnet$ CE ($W m^{-2}$)')
-# plt.title('(i)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['rnet']['mean']) - full_dict['cloud_diff']['rnet']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(o) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -506,41 +464,36 @@ ax = axs[15]
 plt.sca(ax)
 plt.ylabel(r'$Q_M$ CE ($W m^{-2}$)')
 plt.xlabel(r'$Q_S$ CE ($W m^{-2}$)')
-# plt.title('(f)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['qs']['mean']) - full_dict['cloud_diff']['qs']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(p) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
 
 ax = axs[16]
 plt.sca(ax)
-# plt.ylabel(r'$Q_M$ CE ($W m^{-2}$)')
 plt.xlabel(r'$Q_L$ CE ($W m^{-2}$)')
-# plt.title('(f)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['ql']['mean']) - full_dict['cloud_diff']['ql']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(q) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
 
 ax = axs[17]
 plt.sca(ax)
-# plt.ylabel(r'$Q_M$ CE ($W m^{-2}$)')
 plt.xlabel(r'$Q_L$ +$Q_S$ CE ($W m^{-2}$)')
-# plt.title('(f)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
@@ -548,8 +501,8 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         lw = np.nanmean(full_dict['cloud_diff']['ql']['mean']) - full_dict['cloud_diff']['ql']['mean'][0.1] + np.nanmean(
             full_dict['cloud_diff']['qs']['mean']) - full_dict['cloud_diff']['qs']['mean'][0.1]
-        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        sw = (np.nanmean(full_dict['cloud_diff']['qm']['mean']) - full_dict['cloud_diff']['qm']['mean'][0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(r) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -558,7 +511,6 @@ ax = axs[19]
 plt.sca(ax)
 plt.ylabel(r'$Rnet$ CE ($W m^{-2}$)')
 plt.xlabel(r'$Q_L$ +$Q_S$ CE ($W m^{-2}$)')
-# plt.title('(f)')
 x = []
 y = []
 for ii, site in enumerate(sites_to_plot):
@@ -567,8 +519,8 @@ for ii, site in enumerate(sites_to_plot):
         lw = np.nanmean(full_dict['cloud_diff']['ql']['mean']) - full_dict['cloud_diff']['ql']['mean'][0.1] + np.nanmean(
             full_dict['cloud_diff']['qs']['mean']) - full_dict['cloud_diff']['qs']['mean'][0.1]
         sw = (np.nanmean(full_dict['cloud_diff']['rnet']['mean']) - full_dict['cloud_diff']['rnet']['mean'][
-            0.1])  # * 8.64e4/3.44e5 # convert  to mm w.e. per day
-        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), color=polychrome36[ii])
+            0.1])
+        ax.scatter(lw, sw, 100, label=site_labels[site].upper(), marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
         x.append(lw)
         y.append(sw)
 plt.title('(s) r={},p={}'.format(linregress(x, y)[2].round(2), linregress(x, y)[3].round(2)))
@@ -579,7 +531,7 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.scatter(-1, -1, label=site_labels[site].upper(),
-                    color=polychrome36[ii])
+                    marker=cstyle[ii]['markerstyle'], color=cstyle[ii]['color'])
 
 plt.yticks()
 plt.xticks()
@@ -588,45 +540,46 @@ plt.ylim((0, 1))
 plt.axis('off')
 plt.legend(ncol=2, loc='center')
 fig.tight_layout()
-plt.savefig(plot_dir + 'cloud effect qm from bins 4by5 {}.png'.format(cloud_var), dpi=300, bbox_inches='tight')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig12.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig12.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'cloud effect qm from bins 4by5 cb3 {}.png'.format(cloud_var), dpi=300, bbox_inches='tight')
 
+# create cylce of linestyles with same colors as points
+cd = (cycler(color=colors) * cycler(linestyle=[':', '--', '-.', '-']))  # ['D','o','^','s']))
+clstyle = []
+for d in cd:
+    clstyle.append(d)
 
 # plot incoming rad with respect to clear-sky
 fig, axs = plt.subplots(2, 3, figsize=[10, 7.5])
 axs = axs.ravel()
 plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.ylabel(r'Radiation flux ($W m^{-2}$)')
 plt.title('(a) SWin')
-# plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['swin']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Ratio of bin to clear-sky bin')
 plt.title('(b) LWin')
-# plt.axhline(1, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['lwin']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Net radiation flux ($W m^{-2}$)')
 plt.title('(c) SWin + LWin')
-# plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['swin']['mean'] + full_dict['cloud_diff']['lwin']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
 plt.sca(axs[3])
 plt.xticks(np.linspace(0.1, 0.9, 5))
@@ -638,22 +591,20 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['swin']['mean'] - full_dict['cloud_diff']['swin']['mean'][0.1], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[4])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Net radiation flux ($W m^{-2}$)')
 plt.title('(e) LWin cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['lwin']['mean'] - full_dict['cloud_diff']['lwin']['mean'][0.1], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[5])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Net radiation flux ($W m^{-2}$)')
 plt.title('(f) SWin + LWin cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
@@ -661,16 +612,18 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         plt.plot((full_dict['cloud_diff']['swin']['mean'] - full_dict['cloud_diff']['swin']['mean'][0.1]) + (
                 full_dict['cloud_diff']['lwin']['mean'] - full_dict['cloud_diff']['lwin']['mean'][0.1]), label=site_labels[site].upper(),
-                 color=polychrome36[ii])
-plt.savefig(plot_dir + 'allwave incoming by cloud 6 panel {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig6.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig6.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'allwave incoming by cloud 6 panel cb3 {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
 
 # plot rad with respect to clear-sky
 fig, axs = plt.subplots(2, 3, figsize=[10, 7.5])
 axs = axs.ravel()
 plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.ylabel(r'Radiation flux ($W m^{-2}$)')
 plt.title('(a) SWnet')
 plt.axhline(0, color='k', linestyle='--')
@@ -678,29 +631,25 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['swnet']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Ratio of bin to clear-sky bin')
 plt.title('(b) LWnet')
 plt.axhline(1, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['lwnet']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Net radiation flux ($W m^{-2}$)')
 plt.title('(c) Rnet')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['rnet']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
 plt.sca(axs[3])
 plt.xticks(np.linspace(0.1, 0.9, 5))
@@ -712,35 +661,35 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['swnet']['mean'] - full_dict['cloud_diff']['swnet']['mean'][0.1], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[4])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Net radiation flux ($W m^{-2}$)')
 plt.title('(e) LWnet cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['lwnet']['mean'] - full_dict['cloud_diff']['lwnet']['mean'][0.1], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[5])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-# plt.ylabel(r'Net radiation flux ($W m^{-2}$)')
 plt.title('(f) Rnet cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff']['rnet']['mean'] - full_dict['cloud_diff']['rnet']['mean'][0.1], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
-plt.savefig(plot_dir + 'Net rad terms by cloud 6 panel {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig7.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig7.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'Net rad terms by cloud 6 panel {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
 
 # plot melt frequency and fraction of time in each cloud condition
 fig, axs = plt.subplots(1, 2, figsize=[7, 4])
-# fig, axs = plt.subplots(1, 3, figsize=[10, 4])
 plt.sca(axs[0])
 plt.ylim([0, 100])
 plt.xticks(np.linspace(0.1, 0.9, 5))
@@ -749,7 +698,7 @@ plt.ylabel('% of hours with surface melt')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
-        plt.plot(full_dict['melt_freq_all_time']['freq'] * 100, label=site_labels[site].upper(), color=polychrome36[ii])
+        plt.plot(full_dict['melt_freq_all_time']['freq'] * 100, label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.grid()
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
@@ -768,74 +717,35 @@ for ii, site in enumerate(sites_to_plot):
                              (i, 3.03),  # this is the point to label
                              # textcoords="offset points",  # how to position the text
                              # xytext=(2, 2),  # distance from text to points (x,y)
-                             ha='right', fontsize=10, color=polychrome36[ii])  # fontweight='bold', color='b')
-        plt.plot(dat, label=site_labels[site].upper(), color=polychrome36[ii])
+                             ha='right', fontsize=10, color=clstyle[ii]['color'])  # fontweight='bold', color='b')
+        plt.plot(dat, label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.ylim(top=3.2)
 plt.grid()
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
-# plt.tight_layout()
-plt.savefig(plot_dir + 'melt and normalised melt freqency by cloud with limit A {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,),
-            bbox_inches='tight')
-
-
-# plot melt frequency and fraction of time in each cloud condition
-fig, axs = plt.subplots(1, 2, figsize=[7, 4])
-# fig, axs = plt.subplots(1, 3, figsize=[10, 4])
-plt.sca(axs[0])
-plt.ylim([0, 1])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel('Fraction of hours with surface melt')
-# plt.title('(a) Fraction of hours with surface melt')
-plt.axhline(1, color='k', linestyle='--')
-# plt.title('(a) Surface melt')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot(full_dict['melt_freq_all_time']['freq'], label=site_labels[site].upper(), color=polychrome36[ii])
-plt.sca(axs[1])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel('Ratio to clear-sky conditions')
-# plt.title('(b) Normalised frequency of cloud bin ')
-# plt.title('(b) Change w.r.t. clear-sky conditions')
-plt.axhline(1, color='k', linestyle='--')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        dat = full_dict['melt_freq_all_time']['freq'] / full_dict['melt_freq_all_time']['freq'][0.1]
-        if site == 'guanaco':
-            dat.values[1:] = np.nan
-        if site == 'mera_summit':
-            dat = full_dict['melt_freq_all_time']['freq'] / full_dict['melt_freq_all_time']['freq'][0.3]
-        plt.plot(dat, label=site_labels[site].upper(), color=polychrome36[ii])
-lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
-# plt.tight_layout()
-plt.savefig(plot_dir + 'melt and normalised melt freqency by cloud with limit B {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,),
-            bbox_inches='tight')
-
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig9.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig9.png', dpi=600, format='png', bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'melt and normalised melt freqency by cloud with limit A {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,),
+                bbox_inches='tight')
 
 # plot average melt energy by cloud fraction, with normalised
-# fig, axs = plt.subplots(1, 3, figsize=[10, 4])
 fig, axs = plt.subplots(1, 2, figsize=[7, 4])
 plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.ylabel(r'$Q_M$ ($W m^{-2}$)')
-# plt.title(r'(a) $Q_M$')
 plt.axhline(1, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff']['qm']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
+        plt.plot(full_dict['cloud_diff']['qm']['mean'], label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.grid()
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.ylabel(r'Ratio to clear-sky conditions')
-# plt.title(r'(b) $Q_M$ w.r.t. clear-sky conditions')
 plt.axhline(1, color='k', linestyle='--')
-# plt.ylim(bottom=-20)
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
@@ -852,57 +762,21 @@ for ii, site in enumerate(sites_to_plot):
                                  (i, 2.03),  # this is the point to label
                                  # textcoords="offset points",  # how to position the text
                                  # xytext=(2, 2),  # distance from text to points (x,y)
-                                 ha='right', fontsize=10, color=polychrome36[ii])
-        plt.plot(dat, label=site_labels[site].upper(), color=polychrome36[ii])
+                                 ha='right', fontsize=10, color=clstyle[ii]['color'])
+        plt.plot(dat, label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 if ind_frac_max_melt != .8:
     plt.ylim(bottom=.4, top=2.2)
     plt.yticks(np.arange(0.4, 2.2, 0.2))
 plt.grid()
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
-plt.savefig(plot_dir + 'qm wrt cs{}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
-
-# plot average melt energy by cloud fraction, with normalised
-# fig, axs = plt.subplots(1, 3, figsize=[10, 4])
-fig, axs = plt.subplots(1, 2, figsize=[7, 4])
-plt.sca(axs[0])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel(r'Surface melt (mm w.e.)')
-# plt.title(r'(a) Surface melt')
-plt.axhline(1, color='k', linestyle='--')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff']['qm']['mean'] * 8.64e4 / 3.44e5, label=site_labels[site].upper(), color=polychrome36[ii])
-plt.grid()
-plt.sca(axs[1])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel(r'Ratio to clear-sky conditions')
-# plt.title(r'(b) Melt w.r.t. clear-sky conditions')
-plt.axhline(1, color='k', linestyle='--')
-# plt.ylim(bottom=-20)
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        dat = full_dict['cloud_diff']['qm']['mean'] / full_dict['cloud_diff']['qm']['mean'][0.1]
-        if site == 'guanaco':
-            dat.values[1:] = np.nan
-        if site == 'mera_summit':
-            for i in [0.3, 0.5, 0.7, 0.9]:
-                plt.annotate(dat[i].round(decimals=2),  # text to display
-                             (i, 2.03),  # this is the point to label
-                             # textcoords="offset points",  # how to position the text
-                             # xytext=(2, 2),  # distance from text to points (x,y)
-                             ha='right', fontsize=10, color=polychrome36[ii])
-        plt.plot(dat, label=site_labels[site].upper(), color=polychrome36[ii])
-plt.ylim(bottom=.4, top=2.2)
-plt.grid()
-plt.yticks(np.arange(0.4, 2.2, 0.2))
-lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
-plt.savefig(plot_dir + 'melt wrt cs with limit{}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig10.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig10.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+elif '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.8':
+    plt.savefig(plot_dir + 'Fig13.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig13.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'qm wrt cs{}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
 
 # plot SEB terms as fraction of Qm during melting periods only
 fig, axs = plt.subplots(2, 3, figsize=[10, 7.5])
@@ -911,32 +785,29 @@ plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.title('(a) $SWnet$')
 plt.ylabel(r'Fraction of $Q_M$')
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['swnet']['mean'] / full_dict['cloud_diff_during_melt']['qm']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.title('(b) $LWnet$')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['lwnet']['mean'] / full_dict['cloud_diff_during_melt']['qm']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.title('(c) $Rnet$')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['rnet']['mean'] / full_dict['cloud_diff_during_melt']['qm']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
 plt.sca(axs[3])
 plt.ylabel(r'Fraction of $Q_M$')
@@ -948,7 +819,7 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['qs']['mean'] / full_dict['cloud_diff_during_melt']['qm']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[4])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -958,7 +829,7 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['ql']['mean'] / full_dict['cloud_diff_during_melt']['qm']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[5])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -969,9 +840,12 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         plt.plot((full_dict['cloud_diff_during_melt']['lwnet']['mean'] + full_dict['cloud_diff_during_melt']['qs']['mean'] +
                   full_dict['cloud_diff_during_melt']['ql']['mean']) / full_dict['cloud_diff_during_melt']['qm']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
-plt.savefig(plot_dir + 'SEB terms during melt as fraction of qm by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig11.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig11.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'SEB terms during melt as fraction of qm by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
 
 # plot SEB terms during melting periods only
 fig, axs = plt.subplots(2, 4, figsize=[10, 7.5])
@@ -980,32 +854,29 @@ plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.title('(a) $SWnet$')
 plt.ylabel(r'Energy flux ($W m^{-2}$)')
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['swnet']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.title('(b) $LWnet$')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['lwnet']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-# plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.title('(c) $Rnet$')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['rnet']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
 plt.sca(axs[3])
 plt.ylabel(r'Energy flux ($W m^{-2}$)')
@@ -1017,7 +888,7 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['qs']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[4])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -1027,7 +898,7 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot(full_dict['cloud_diff_during_melt']['ql']['mean'], label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[5])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -1038,7 +909,7 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         plt.plot((full_dict['cloud_diff_during_melt']['lwnet']['mean'] + full_dict['cloud_diff_during_melt']['qs']['mean'] +
                   full_dict['cloud_diff_during_melt']['ql']['mean']), label=site_labels[site].upper(),
-                 color=polychrome36[ii])
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[6])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -1049,9 +920,12 @@ for ii, site in enumerate(sites_to_plot):
         full_dict = collated_dict[site]
         plt.plot((full_dict['cloud_diff_during_melt']['qs']['mean'] +
                   full_dict['cloud_diff_during_melt']['ql']['mean']), label=site_labels[site].upper(),
-                 color=polychrome36[ii])
-plt.savefig(plot_dir + 'SEB terms during melt qm by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
+                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'FigA5.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA5.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'SEB terms during melt qm by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
 
 # plot meteorology by cloud condition
 fig, axs = plt.subplots(1, 4, figsize=[11.5, 4])
@@ -1064,7 +938,7 @@ plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff']['tc']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
+        plt.plot(full_dict['cloud_diff']['tc']['mean'], label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -1073,7 +947,7 @@ plt.title('(b) wind speed')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff']['ws']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
+        plt.plot(full_dict['cloud_diff']['ws']['mean'], label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -1083,7 +957,7 @@ plt.axhline(6.15, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff']['ea']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
+        plt.plot(full_dict['cloud_diff']['ea']['mean'], label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[3])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
@@ -1092,50 +966,10 @@ plt.title('(d) $RH$')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff']['rh']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
+        plt.plot(full_dict['cloud_diff']['rh']['mean'], label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
-plt.savefig(plot_dir + 'met by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
-
-
-# plot meteorology during melting periods by cloud condition
-fig, axs = plt.subplots(1, 4, figsize=[11.5, 4])
-plt.sca(axs[0])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel('$^{o}C$')
-plt.title('(a) tc')
-plt.axhline(0, color='k', linestyle='--')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff_during_melt']['tc']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
-plt.sca(axs[1])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel('$m s^{-1}$')
-plt.title('(b) ws')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff_during_melt']['ws']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
-plt.sca(axs[2])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel('$hPa$')
-plt.title('(c) ea')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff_during_melt']['ea']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
-plt.axhline(6.15, color='k', linestyle='--')
-plt.sca(axs[3])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.ylabel(r'%')
-plt.title('(d) rh')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot(full_dict['cloud_diff_during_melt']['rh']['mean'], label=site_labels[site].upper(), color=polychrome36[ii])
-lg = plt.legend(bbox_to_anchor=(1.5, 0.5), loc='center right')
-plt.savefig(plot_dir + 'met during melt by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'Fig8.pdf', dpi=600, format='pdf', bbox_extra_artists=(lg,), bbox_inches='tight')
+    plt.savefig(plot_dir + 'Fig8.png', dpi=600, format='png', bbox_extra_artists=(lg,), bbox_inches='tight')
+else:
+    plt.savefig(plot_dir + 'met by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
