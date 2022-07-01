@@ -16,7 +16,7 @@ from cycler import cycler
 cs_thres = 0.20
 ov_thres = 0.80
 n_days_thres = 10
-ind_frac_max_melt = .2  # fraction of maximum monthly average melt rate to use to select months for analysis
+ind_frac_max_melt = 0.2  # fraction of maximum monthly average melt rate to use to select months for analysis
 
 data_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/'
 plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/revision/{}/'.format(ind_frac_max_melt)
@@ -223,7 +223,8 @@ plt.ylabel('Latitude (°N)')
 plt.axhline(0, color='k', linestyle=':')
 fig.tight_layout()
 adjust_text(text)
-plt.savefig(plot_dir + 'Fig2.png'.format(ind_frac_max_melt), dpi=300, format='png')
+plt.savefig(plot_dir + 'Fig2.png'.format(ind_frac_max_melt), dpi=600, format='png')
+plt.savefig(plot_dir + 'Fig2.pdf'.format(ind_frac_max_melt), dpi=600, format='pdf')
 
 plt.rcParams.update({'font.size': 8})
 
@@ -558,7 +559,7 @@ axs = axs.ravel()
 plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.ylabel(r'Radiation flux ($W m^{-2}$)')
-plt.title('(a) SWin')
+plt.title('(a) $SWin$')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
@@ -566,7 +567,7 @@ for ii, site in enumerate(sites_to_plot):
                  linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.title('(b) LWin')
+plt.title('(b) $LWin$')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
@@ -574,7 +575,7 @@ for ii, site in enumerate(sites_to_plot):
                  linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.title('(c) SWin + LWin')
+plt.title('(c) $SWin$ + $LWin$')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
@@ -585,7 +586,7 @@ plt.sca(axs[3])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.ylabel(r'Radiation flux ($W m^{-2}$)')
-plt.title('(d) SWin cloud effect')
+plt.title('(d) $SWin$ cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -595,7 +596,7 @@ for ii, site in enumerate(sites_to_plot):
 plt.sca(axs[4])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.title('(e) LWin cloud effect')
+plt.title('(e) $LWin$ cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -605,7 +606,7 @@ for ii, site in enumerate(sites_to_plot):
 plt.sca(axs[5])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.title('(f) SWin + LWin cloud effect')
+plt.title('(f) $SWin$ + $LWin$ cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -625,7 +626,7 @@ axs = axs.ravel()
 plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.ylabel(r'Radiation flux ($W m^{-2}$)')
-plt.title('(a) SWnet')
+plt.title('(a) $SWnet$')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -634,7 +635,7 @@ for ii, site in enumerate(sites_to_plot):
                  linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[1])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.title('(b) LWnet')
+plt.title('(b) $LWnet$')
 plt.axhline(1, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -643,7 +644,7 @@ for ii, site in enumerate(sites_to_plot):
                  linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 plt.sca(axs[2])
 plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.title('(c) Rnet')
+plt.title('(c) $Rnet$')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -655,7 +656,7 @@ plt.sca(axs[3])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
 plt.ylabel(r'Radiation flux ($W m^{-2}$)')
-plt.title('(d) SWnet cloud effect')
+plt.title('(d) $SWnet$ cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -665,7 +666,7 @@ for ii, site in enumerate(sites_to_plot):
 plt.sca(axs[4])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.title('(e) LWnet cloud effect')
+plt.title('(e) $LWnet$ cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
@@ -675,7 +676,7 @@ for ii, site in enumerate(sites_to_plot):
 plt.sca(axs[5])
 plt.xticks(np.linspace(0.1, 0.9, 5))
 plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.title('(f) Rnet cloud effect')
+plt.title('(f) $Rnet$ cloud effect')
 plt.axhline(0, color='k', linestyle='--')
 for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:

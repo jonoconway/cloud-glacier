@@ -13,10 +13,11 @@ from calc_cloud_metrics import find_cs_from_lw
 cs_thres = 0.2
 ov_thres = 0.8
 n_days_thres = 10
-ind_frac_max_melt = .8
+ind_frac_max_melt = 0.2
 
 data_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/'
-plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/revision/{}_{}_{}_{}/'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt)
+plot_dir = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/plots/publication/revision/{}_{}_{}_{}/'.format( \
+    cs_thres, ov_thres, n_days_thres, ind_frac_max_melt)
 infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/collated/collated_monthly_{}_{}_{}.pkl'.format(cs_thres, ov_thres,
                                                                                                                                 n_days_thres)
 
@@ -24,7 +25,6 @@ if not os.path.exists(plot_dir):
     os.makedirs(plot_dir)
 
 collated_dict = pickle.load(open(infile, 'rb'))
-
 
 sites_to_plot = ['langfjordjokelen', 'qasi', 'storbreen', 'midtdalsbreen', 'nordic', 'conrad_abl', 'conrad_acc', 'morteratsch',
                  'chhota_shigri', 'yala', 'naulek', 'mera_summit', 'kersten', 'zongo', 'guanaco', 'brewster']
@@ -80,8 +80,8 @@ for i, site in enumerate(sites_to_plot):
     plt.bar(np.arange(1, 13), ov_f, bottom=cs_f + pc_f, facecolor=[.3, .3, .3], label='overcast')
 
     plt.bar(np.arange(1, 13)[blue], cs_f[blue], facecolor=[0.741, 0.843, 0.906], label='clear-sky')
-    plt.bar(np.arange(1, 13)[blue], pc_f[blue], bottom=cs_f[blue], facecolor=[0.42 , 0.682, 0.839], label='partly-cloudy')
-    plt.bar(np.arange(1, 13)[blue], ov_f[blue], bottom=cs_f[blue] + pc_f[blue], facecolor=[0.031, 0.318, 0.612], label='overcast')#0.129, 0.443, 0.71
+    plt.bar(np.arange(1, 13)[blue], pc_f[blue], bottom=cs_f[blue], facecolor=[0.42, 0.682, 0.839], label='partly-cloudy')
+    plt.bar(np.arange(1, 13)[blue], ov_f[blue], bottom=cs_f[blue] + pc_f[blue], facecolor=[0.031, 0.318, 0.612], label='overcast')  # 0.129, 0.443, 0.71
 
     plt.xticks(np.arange(1, 13), ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
     plt.ylim(0, 1)
@@ -92,7 +92,7 @@ for i, site in enumerate(sites_to_plot):
     plt.title(site_labels[site].upper())
 
 plt.tight_layout()
-if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
     plt.savefig(plot_dir + 'FigA4.pdf', dpi=600, format='pdf', bbox_inches='tight')
     plt.savefig(plot_dir + 'FigA4.png', dpi=600, format='png', bbox_inches='tight')
 else:
@@ -119,8 +119,8 @@ for i, site in enumerate(sites_to_plot):
     plt.bar(np.arange(1, 13), ov_f, bottom=cs_f + pc_f, facecolor=[.3, .3, .3], label='overcast')
 
     plt.bar(np.arange(1, 13)[blue], cs_f[blue], facecolor=[0.741, 0.843, 0.906], label='clear-sky')
-    plt.bar(np.arange(1, 13)[blue], pc_f[blue], bottom=cs_f[blue], facecolor=[0.42 , 0.682, 0.839], label='partly-cloudy')
-    plt.bar(np.arange(1, 13)[blue], ov_f[blue], bottom=cs_f[blue] + pc_f[blue], facecolor=[0.031, 0.318, 0.612], label='overcast')#0.129, 0.443, 0.71
+    plt.bar(np.arange(1, 13)[blue], pc_f[blue], bottom=cs_f[blue], facecolor=[0.42, 0.682, 0.839], label='partly-cloudy')
+    plt.bar(np.arange(1, 13)[blue], ov_f[blue], bottom=cs_f[blue] + pc_f[blue], facecolor=[0.031, 0.318, 0.612], label='overcast')  # 0.129, 0.443, 0.71
 
     plt.xticks(np.arange(1, 13), ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
     plt.ylim(0, 1)
@@ -129,7 +129,7 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         plt.ylabel('Fraction of days')
     plt.title(site_labels[site].upper())
-if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
     plt.savefig(plot_dir + 'Fig5.pdf', dpi=600, format='pdf', bbox_inches='tight')
     plt.savefig(plot_dir + 'Fig5.png', dpi=600, format='png', bbox_inches='tight')
 elif '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.8':
@@ -190,7 +190,7 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         plt.ylabel(r'$\varepsilon_{eff}$')
     plt.title(site_labels[site].upper())
-if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
     plt.savefig(plot_dir + 'Fig4.pdf', dpi=600, format='pdf', bbox_inches='tight')
     plt.savefig(plot_dir + 'Fig4.png', dpi=600, format='png', bbox_inches='tight')
 else:
@@ -205,11 +205,11 @@ for i, site in enumerate(sites_to_plot):
     ax_rh = plt.twinx(ax)
     # colors = plt.cm.tab10
     full_dict = collated_dict[site]
-    for j, var in enumerate(['tc', 'ts', 'ea', 'rh', 'ws','alb']):
+    for j, var in enumerate(['tc', 'ts', 'ea', 'rh', 'ws', 'alb']):
         month_df = full_dict['month_df']
         if var in ['rh', 'alb']:
             if var == 'alb':
-                ax_rh.plot(month_df[var].values *100, '-x', color=colors[j], label=var)
+                ax_rh.plot(month_df[var].values * 100, '-x', color=colors[j], label=var)
             else:
                 ax_rh.plot(month_df[var].values, '-x', color=colors[j], label=var)
         else:
@@ -225,16 +225,16 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         ax.set_ylabel(r'°C, $hPa$, $ms^{-1}$')
         # ax.set_ylabel(r'$T_a$ (°C),$T_s$ (°C), $e_a$ (hPa), $ws (ms^{-1})$')
-            #', '.join(['tc', 'ts', 'ea', 'ws']))
+        # ', '.join(['tc', 'ts', 'ea', 'ws']))
     if i % 4 == 3:
         ax_rh.set_yticklabels(np.arange(0, 120, 20))
         ax_rh.set_ylabel(r'$RH$, albedo (%)')
     if i == 4:
-        ax.legend([r'$T_a$',r'$T_s$', r'$e_a$', r'$WS$'], loc='upper left',  facecolor='none')#frameon=False,
-        ax_rh.legend([r'$RH$', 'alb'],loc='lower left', facecolor='none')#frameon=False,
+        ax.legend([r'$T_a$', r'$T_s$', r'$e_a$', r'$WS$'], loc='upper left', facecolor='none')  # frameon=False,
+        ax_rh.legend([r'$RH$', 'alb'], loc='lower left', facecolor='none')  # frameon=False,
     plt.title(site_labels[site].upper())
 plt.tight_layout()
-if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
     plt.savefig(plot_dir + 'FigA1.pdf', dpi=600, format='pdf', bbox_inches='tight')
     plt.savefig(plot_dir + 'FigA1.png', dpi=600, format='png', bbox_inches='tight')
 else:
@@ -252,10 +252,10 @@ for i, site in enumerate(sites_to_plot):
     for j, var in enumerate(['swnet', 'lwnet', 'rnet', 'qs', 'ql', 'qm', 'qc']):  # 'qr', 'qps',
         if var in month_df.keys():
             ax.plot(month_df[var].values, '-*', color=colors[j], label=var)
-        elif i == 4:# make hidden point to plot missing variables in lengend
-            ax.plot(-1,0,'-*', color=colors[j],label=var)
+        elif i == 4:  # make hidden point to plot missing variables in lengend
+            ax.plot(-1, 0, '-*', color=colors[j], label=var)
     # plt.ylim(0, 1.2)
-    plt.xlim(-0.5,11.5)
+    plt.xlim(-0.5, 11.5)
     ax.set_xticks(np.arange(12))
 
     ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
@@ -264,15 +264,14 @@ for i, site in enumerate(sites_to_plot):
     if i % 4 == 0:
         ax.set_ylabel(r'Flux ($W m^{-2}$)')
     if i == 4:
-        l = ax.legend(['$SWnet$', '$LWnet$', '$Rnet$', '$Q_S$', '$Q_L$',  '$Q_M$','$Q_C$',],loc='center left', facecolor='none',frameon=False)
+        l = ax.legend(['$SWnet$', '$LWnet$', '$Rnet$', '$Q_S$', '$Q_L$', '$Q_M$', '$Q_C$', ], loc='center left', facecolor='none', frameon=False)
 
     plt.title(site_labels[site].upper())
 plt.tight_layout()
 
-if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres,ind_frac_max_melt) == '0.2_0.8_10_0.2':
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
     plt.savefig(plot_dir + 'FigA2.png', dpi=600, format='pdf', bbox_inches='tight')
     plt.savefig(plot_dir + 'FigA2.png', dpi=600, format='png', bbox_inches='tight')
 else:
     plt.savefig(plot_dir + 'all monthly fluxes cb.png', dpi=300, format='png')  # bbox_extra_artists=(lg,),,  bbox_inches='tight'
 plt.close()
-
