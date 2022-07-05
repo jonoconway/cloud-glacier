@@ -41,5 +41,8 @@ for site in sites_to_plot:
 fig.tight_layout()
 adjust_text(text)
 
+fig.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\MarsdenFS2018\Obj1\Obs data\collated\plots\publication\revision\final\Fig1.pdf', dpi=600, format='pdf')
+fig.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\MarsdenFS2018\Obj1\Obs data\collated\plots\publication\revision\final\Fig1.png', dpi=600, format='png')
+
 fig.savefig('C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Obj1/Obs data/data_sites_RGI_Sept2021_shortnames.png', dpi=600)
 plt.clf()

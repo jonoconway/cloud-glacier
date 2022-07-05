@@ -201,6 +201,12 @@ cstyle = []
 for d in cc:
     cstyle.append(d)
 
+# create cylce of linestyles with same colors as points
+cd = (cycler(color=colors) * cycler(linestyle=[':', '--', '-.', '-']))  # ['D','o','^','s']))
+clstyle = []
+for d in cd:
+    clstyle.append(d)
+
 # plot altitude and latitude of sites
 fig, ax = plt.subplots(figsize=[6, 4])
 text = []
@@ -226,7 +232,27 @@ adjust_text(text)
 plt.savefig(plot_dir + 'Fig2.png'.format(ind_frac_max_melt), dpi=600, format='png')
 plt.savefig(plot_dir + 'Fig2.pdf'.format(ind_frac_max_melt), dpi=600, format='pdf')
 
+
+# plot melt frequency and fraction of time in each cloud condition for key figure
+fig, axs = plt.subplots(1, 1, figsize=[3.5,3.5])
+plt.ylim([0, 100])
+plt.xticks(np.linspace(0.1, 0.9, 5))
+plt.title('Melt frequency vs cloudiness',fontsize=12)
+plt.xlabel(r'Cloudiness',fontsize=10)
+plt.ylabel('% of hours with surface melt',fontsize=10)
+for ii, site in enumerate(sites_to_plot):
+    if site in sites_to_plot:
+        full_dict = collated_dict[site]
+        plt.plot(full_dict['melt_freq_all_time']['freq'] * 100, label=site_labels[site].upper(), linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
+plt.grid()
+lg = plt.legend(bbox_to_anchor=(1.35, 0.5), loc='center right')
+if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
+    plt.savefig(plot_dir + 'KeyFigure.pdf', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'KeyFigure.png', dpi=600, format='png', bbox_inches='tight')
+
+
 plt.rcParams.update({'font.size': 8})
+
 
 # plot average cloud effects by site attributes
 fig, axs = plt.subplots(4, 5, figsize=[10, 8])
@@ -547,11 +573,7 @@ if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == 
 else:
     plt.savefig(plot_dir + 'cloud effect qm from bins 4by5 cb3 {}.png'.format(cloud_var), dpi=300, bbox_inches='tight')
 
-# create cylce of linestyles with same colors as points
-cd = (cycler(color=colors) * cycler(linestyle=[':', '--', '-.', '-']))  # ['D','o','^','s']))
-clstyle = []
-for d in cd:
-    clstyle.append(d)
+
 
 # plot incoming rad with respect to clear-sky
 fig, axs = plt.subplots(2, 3, figsize=[10, 7.5])
@@ -849,7 +871,7 @@ else:
     plt.savefig(plot_dir + 'SEB terms during melt as fraction of qm by cloud {}.png'.format(cloud_var), dpi=300, bbox_extra_artists=(lg,), bbox_inches='tight')
 
 # plot SEB terms during melting periods only
-fig, axs = plt.subplots(2, 4, figsize=[10, 7.5])
+fig, axs = plt.subplots(2, 3, figsize=[10, 7.5])
 axs = axs.ravel()
 plt.sca(axs[0])
 plt.xticks(np.linspace(0.1, 0.9, 5))
@@ -909,17 +931,6 @@ for ii, site in enumerate(sites_to_plot):
     if site in sites_to_plot:
         full_dict = collated_dict[site]
         plt.plot((full_dict['cloud_diff_during_melt']['lwnet']['mean'] + full_dict['cloud_diff_during_melt']['qs']['mean'] +
-                  full_dict['cloud_diff_during_melt']['ql']['mean']), label=site_labels[site].upper(),
-                 linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
-plt.sca(axs[6])
-plt.xticks(np.linspace(0.1, 0.9, 5))
-plt.xlabel(r'$N_\epsilon$ bin centre')
-plt.title('(f) $Q_S+Q_L$')
-plt.axhline(0, color='k', linestyle='--')
-for ii, site in enumerate(sites_to_plot):
-    if site in sites_to_plot:
-        full_dict = collated_dict[site]
-        plt.plot((full_dict['cloud_diff_during_melt']['qs']['mean'] +
                   full_dict['cloud_diff_during_melt']['ql']['mean']), label=site_labels[site].upper(),
                  linestyle=clstyle[ii]['linestyle'], color=clstyle[ii]['color'])
 if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':

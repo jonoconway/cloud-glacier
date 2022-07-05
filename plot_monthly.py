@@ -254,10 +254,8 @@ for i, site in enumerate(sites_to_plot):
             ax.plot(month_df[var].values, '-*', color=colors[j], label=var)
         elif i == 4:  # make hidden point to plot missing variables in lengend
             ax.plot(-1, 0, '-*', color=colors[j], label=var)
-    # plt.ylim(0, 1.2)
     plt.xlim(-0.5, 11.5)
     ax.set_xticks(np.arange(12))
-
     ax.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'])
     if i >= 12:
         ax.set_xlabel('Month')
@@ -265,12 +263,10 @@ for i, site in enumerate(sites_to_plot):
         ax.set_ylabel(r'Flux ($W m^{-2}$)')
     if i == 4:
         l = ax.legend(['$SWnet$', '$LWnet$', '$Rnet$', '$Q_S$', '$Q_L$', '$Q_M$', '$Q_C$', ], loc='center left', facecolor='none', frameon=False)
-
     plt.title(site_labels[site].upper())
 plt.tight_layout()
-
 if '{}_{}_{}_{}'.format(cs_thres, ov_thres, n_days_thres, ind_frac_max_melt) == '0.2_0.8_10_0.2':
-    plt.savefig(plot_dir + 'FigA2.png', dpi=600, format='pdf', bbox_inches='tight')
+    plt.savefig(plot_dir + 'FigA2.pdf', dpi=600, format='pdf', bbox_inches='tight')
     plt.savefig(plot_dir + 'FigA2.png', dpi=600, format='png', bbox_inches='tight')
 else:
     plt.savefig(plot_dir + 'all monthly fluxes cb.png', dpi=300, format='png')  # bbox_extra_artists=(lg,),,  bbox_inches='tight'
