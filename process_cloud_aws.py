@@ -640,7 +640,7 @@ if __name__ == '__main__':
         # calc clear-sky shortwave
         aws_df = add_clear_sky(aws_df, aws_loc, method='pvlib')
         sw_pot = aws_df.sw_cs_ghi.values
-        times2 = pd.DatetimeIndex(aws_df.utc_time) - dt.timedelta(minutes=datastep / 2)
+        times2 = pd.DatetimeIndex(aws_df.utc_time)
         solpos = solarposition.get_solarposition(times2, aws_loc.latitude, aws_loc.longitude)
         apparent_zenith = solpos['apparent_zenith'].values
         apparent_elevation = solpos['apparent_elevation'].values
