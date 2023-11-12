@@ -41,3 +41,17 @@ matplotlib
 cartopy
 pvlib
 adjustText
+
+
+### importing new datasets
+
+1. set up a new file 'import_newsite.py'
+this should read the data into a pandas dataframe with unique headers
+specify the location attributes using
+Location(latitude in degrees N, longitude in degrees E, timezone of data in compatiable format, altitude in metres, arbitrary name)
+e.g. mort = Location(46.4167, 9.4167, tz='UTC', altitude=2100, name='Morteratsch')  # in UTC
+specify the length of the record using
+start and end times in timezone of dataset, timestep of data
+e.g. times_mort = pd.date_range(start='1998-07-09 00:30', end='2007-05-15 00:00', freq='30min', tz=mort.tz)
+2. Add an extra entry to process_cloud_aws.py
+this is where you choose which variables correspond to the standard variables used in the processing, and where to cut the start and end of the record.
